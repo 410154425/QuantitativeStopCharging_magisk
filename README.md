@@ -37,7 +37,7 @@ Supported functions (optional on or off in the configuration file):
 
 6.电流温控模式：指定温度限制充电电流为自定义充电电流。
 
-6. Current temperature control mode: specify the temperature limit charging current as user-defined charging current.
+6. Battery current temperature control mode: custom charging current when the specified temperature is reached.
 
 7.自定义开关路径、自定义电流文件路径、自定义其它文件参数。
 
