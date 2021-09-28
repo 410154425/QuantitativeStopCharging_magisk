@@ -5,7 +5,7 @@ This is a QSC quantitative stop charging magick module running on Android device
 
 用于指定电量、指定温度自动停止供电、恢复供电、涓流充电(伪电池闲置模式、伪旁路充电)、游戏模式自定义充电电流。
 
-It is used to automatically stop power supply, restore power supply, trickle charging (pseudo battery idle mode, pseudo bypass charging) and customize charging current in game mode.
+It is used to automatically stop power supply, restore power supply, trickle charging (pseudo battery idle mode, pseudo bypass charging) and customize charging current.
 
 配置文件路径：/data/adb/modules/QuantitativeStopCharging/config.conf，日志文件log.log。
 
