@@ -25,7 +25,7 @@ Supported functions (optional on or off in the configuration file):
 
 3.自定义电量涓流充电（伪电池闲置模式、伪旁路充电）。
 
-3. User defined trickle charging (pseudo battery idle mode, pseudo bypass charging).
+3. Custom power trickle charging (pseudo battery idle mode, pseudo bypass charging).
 
 4.游戏模式：指定APP自定义充电电流。
 
