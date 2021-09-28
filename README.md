@@ -45,7 +45,7 @@ Supported functions (optional on or off in the configuration file):
 
 8.自定义温度传感器路径：使用 “temp.sh” 脚本可获取所有温度传感器路径脚本，模块默认使用电池温度，脚本可获取其它温度传感器的路径，其中名称battery为电池温度，获取到路径填入配置文件即可（不填则默认使用电池温度，个别设备电池温度是固定不变化的）。
 
-8. User defined temperature sensor path: use the "temp. Sh" script to obtain the path scripts of all temperature sensors. The module uses the battery temperature by default. The script can obtain the paths of other temperature sensors, where the name battery is the battery temperature. Fill in the configuration file after obtaining the path (if it is not filled in, the battery temperature is used by default, and the battery temperature of individual devices is fixed) 。
+8. User defined temperature sensor path: use the "temp. Sh" script to obtain the path scripts of all temperature sensors. The module uses the battery temperature by default. The script can obtain the paths of other temperature sensors, where the name battery is the battery temperature. Fill in the configuration file after obtaining the path (If it is not filled in, the battery temperature is used by default. The battery temperature of some devices is fixed) 
 
 模块逻辑：不充电不触发模块功能（自定义关机电量除外），仅在充电时触发，定量停充-开关温控-涓流模式-电流温控-游戏模式-默认电流模式，从前至后匹配，符合就触发，只触发一个，不会同时触发，然后结束，再循环匹配。
 
