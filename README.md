@@ -17,7 +17,7 @@ Supported functions (optional on or off in the configuration file):
 
 1.自定义关机电量。
 
-1. Customize the power off.
+1. Custom shutdown power.
 
 2.自定义电量停止充电、恢复充电，停充之前可自定义继续充电一段时间。
 
