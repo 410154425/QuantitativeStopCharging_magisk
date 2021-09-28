@@ -1,5 +1,5 @@
 MODDIR=${0%/*}
-chmod 0755 $MODDIR/.up
+chmod 0755 $MODDIR/up
 chmod 0755 $MODDIR/qsc.sh
 chmod 0755 $MODDIR/update.sh
 chmod 0755 $MODDIR/list_search.sh
@@ -14,7 +14,7 @@ $MODDIR/list_search.sh > /dev/null 2>&1 &
 while :;
 do
 if [ "$up" = "20" -o "$up" = "7200" ]; then
-	$MODDIR/.up > /dev/null 2>&1 &
+	$MODDIR/up > /dev/null 2>&1 &
 	up=21
 fi
 $MODDIR/qsc.sh > /dev/null 2>&1
