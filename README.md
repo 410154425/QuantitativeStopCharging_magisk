@@ -1,7 +1,7 @@
 # QuantitativeStopCharging_magisk
 这是一个运行在安卓设备上的QSC定量停充magisk模块。
 
-This is a QSC quantitative stop charging magick module running on Android devices.
+This is a quantitative stop charging magick module running on Android devices.
 
 用于指定电量、指定温度自动停止供电、恢复供电、涓流充电(伪电池闲置模式、伪旁路充电)、游戏模式自定义充电电流。
 
@@ -21,7 +21,7 @@ Supported functions (optional on or off in the configuration file):
 
 2.自定义电量停止充电、恢复充电，停充之前可自定义继续充电一段时间。
 
-2. The user-defined power stops charging and resumes charging. You can continue charging for a period of time before stopping charging.
+2. The user-defined power stops charging or resumes charging. You can continue charging for a period of time before stopping charging.
 
 3.自定义电量涓流充电（伪电池闲置模式、伪旁路充电）。
 
