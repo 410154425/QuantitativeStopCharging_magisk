@@ -33,7 +33,7 @@ Supported functions (optional on or off in the configuration file):
 
 5.开关温控模式：指定温度停止充电、恢复充电。
 
-5. Switch temperature control mode: stop charging and resume charging at the specified temperature.
+5. Switch temperature control mode: stop charging or resume charging when the specified temperature is reached.
 
 6.电流温控模式：指定温度限制充电电流为自定义充电电流。
 
