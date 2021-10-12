@@ -1,6 +1,8 @@
 # QuantitativeStopCharging_magisk
 这是一个运行在安卓设备上的QSC定量停充magisk模块。
 
+[下载页面](https://github.com/410154425/QuantitativeStopCharging_magisk/releases)选择压缩包QuantitativeStopCharging_magisk_magisk_***.zip，使用Magisk从本地安装。
+
 用于指定电量、指定温度自动停止供电、恢复供电、涓流充电(伪电池闲置模式、伪旁路充电)、游戏模式自定义充电电流。
 
 配置文件路径：/data/adb/modules/QuantitativeStopCharging/config.conf，日志文件log.log。
@@ -23,4 +25,3 @@
 
 8.自定义温度传感器路径：使用 “temp.sh” 脚本可获取所有温度传感器路径脚本，模块默认使用电池温度，脚本可获取其它温度传感器的路径，其中名称battery为电池温度，获取到路径填入配置文件即可（不填则默认使用电池温度，个别设备电池温度是固定不变化的）。
 
-如果对您有帮助，而且您愿意的话，可向我支付宝捐赠：410154425@qq.com
