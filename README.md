@@ -1,7 +1,7 @@
 # QuantitativeStopCharging_magisk
 这是一个运行在安卓设备上的QSC定量停充magisk模块。
 
-[下载页面](https://github.com/410154425/QuantitativeStopCharging_magisk/releases)选择压缩包QuantitativeStopCharging_magisk_***.zip，使用Magisk从本地安装。
+[下载页面](https://github.com/410154425/QuantitativeStopCharging_magisk/releases)点击Assets选择压缩包QuantitativeStopCharging_magisk_***.zip，使用Magisk从本地安装。
 
 用于指定电量、指定温度自动停止供电、恢复供电、涓流充电(伪电池闲置模式、伪旁路充电)、游戏模式自定义充电电流。
 
