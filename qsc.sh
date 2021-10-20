@@ -1,4 +1,5 @@
 MODDIR=${0%/*}
+dumpsys battery reset
 config_conf=$(cat "$MODDIR/config.conf" | egrep -v '^#')
 battery_level=$(dumpsys battery | egrep 'level:' | sed -n 's/.*level: //g;$p')
 battery_powered=$(dumpsys battery | egrep 'powered: true' )
@@ -125,7 +126,7 @@ if [ -n "$battery_powered" ]; then
 			fi
 		done
 		if [ "$log_log" = "1" ]; then
-			echo "$(date +%T) 电量$battery_level 涓流模式：限制电流0 实时电流$current_now 温度$temperature_cpu" >> $MODDIR/log.log
+			echo "$(date +%T) 电量$battery_level 模拟旁路充电：限制电流0 实时电流$current_now 温度$temperature_cpu" >> $MODDIR/log.log
 
 		fi
 		exit 0
@@ -162,7 +163,7 @@ if [ -n "$battery_powered" ]; then
 			if [ "$cpu_log" = "1" ]; then
 				echo "$(date +%T) 温度$temperature_cpu 触发电流温控：限制电流$constant_current_max 实时电流$current_now" >> $MODDIR/log.log
 			else
-				echo "$(date +%T) 电量$battery_level 涓流模式：限制电流$constant_current_max 实时电流$current_now 温度$temperature_cpu" >> $MODDIR/log.log
+				echo "$(date +%T) 电量$battery_level 模拟旁路充电：限制电流$constant_current_max 实时电流$current_now 温度$temperature_cpu" >> $MODDIR/log.log
 			fi
 		fi
 		exit 0
@@ -299,5 +300,5 @@ else
 		fi
 	fi
 fi
-#version=2021091300
+#version=2021102000
 # ##
