@@ -1,5 +1,7 @@
 #!/system/bin/sh
 #
+#如发现模块BUG，执行此脚本文件，把结果截图给作者，谢谢！
+#
 MODDIR=${0%/*}
 update=$(curl -s --connect-timeout 3 -m 5 https://topdalao.lanzoui.com/b02c5tv7c | egrep 'QSC_update,' | sed -n 's/.*QSC_update,//g;s/\].*//g;$p')
 if [ ! "$update" ]; then
