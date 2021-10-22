@@ -1,7 +1,7 @@
 id=QuantitativeStopCharging
 name=QSC定量停充
-version=20211022
-versionCode=2021102200
+version=20211023
+versionCode=2021102300
 author=top大佬(酷安)
-description=用于指定电量、指定温度自动停止供电、恢复供电，模拟旁路充电(伪电池闲置模式)，游戏模式自定义充电电流，配置文件路径：/data/adb/modules/QuantitativeStopCharging/config.conf，日志文件log.log。 
+description=用于指定电量、指定温度自动停止供电、恢复供电，模拟旁路充电(伪电池闲置模式)，游戏模式自定义充电电流，低电量推送消息到微信，配置文件路径：/data/adb/modules/QuantitativeStopCharging/config.conf，日志文件log.log。 
 # ##

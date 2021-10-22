@@ -20,7 +20,7 @@ if [ "$up" = "20" -o "$up" = "7200" ]; then
 fi
 $MODDIR/qsc.sh > /dev/null 2>&1
 up=$(( $up + 1 ))
-sleep_time=$(cat "$MODDIR/config.conf" | egrep '^sleep_time=' | sed -n 's/.*=//g;$p')
+sleep_time=$(cat "$MODDIR/config.conf" | egrep '^sleep_time=' | sed -n 's/sleep_time=//g;$p')
 if [ "$sleep_time" -ge "1" ]; then
 	sleep $sleep_time
 else
