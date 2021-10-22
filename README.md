@@ -3,7 +3,7 @@
 
 [下载页面](https://github.com/410154425/QuantitativeStopCharging_magisk/releases)点击Assets选择压缩包QuantitativeStopCharging_magisk_***.zip，使用Magisk从本地安装。
 
-用于指定电量、指定温度自动停止供电、恢复供电，模拟旁路充电(伪电池闲置模式)，游戏模式自定义充电电流。
+用于指定电量、指定温度自动停止供电、恢复供电，模拟旁路充电(伪电池闲置模式)，游戏模式自定义充电电流，低电量推送消息到微信。
 
 配置文件路径：/data/adb/modules/QuantitativeStopCharging/config.conf，日志文件log.log。
 
