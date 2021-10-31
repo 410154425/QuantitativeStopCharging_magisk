@@ -15,7 +15,7 @@ if [ "$work_weixin" = "1" ]; then
 	Low_battery="$(echo "$config_conf" | egrep '^Low_battery=' | sed -n 's/Low_battery=//g;$p')"
 	if [ "$battery_level" -le "$Low_battery" ]; then
 		if [ ! -f "$MODDIR/Low_battery" ]; then
-			if [ -f "/system/bin/curl" ]; then
+			if type curl > /dev/null 2>&1; then
 				wx_agentid="$(echo "$config_conf" | egrep '^wx_agentid=' | sed -n 's/wx_agentid=//g;$p')"
 				wx_text="$(echo "$config_conf" | egrep '^wx_text=' | sed -n 's/wx_text=//g;$p')"
 				wx_token="$(cat "$MODDIR/wx_$wx_agentid")"
@@ -63,11 +63,12 @@ if [ "$work_weixin" = "1" ]; then
 					echo "$(date +%T) 电量$battery_level 微信消息推送失败：网络问题，访问接口失败" >> "$MODDIR/log.log"
 				fi
 			else
-				echo "$(date +%T) 电量$battery_level 缺少curl命令模块：无法使用微信消息推送功能" >> "$MODDIR/log.log"
+				echo "$(date +%T) 电量$battery_level 缺少curl命令模块：无法使用微信消息推送功能，请安装curl模块后再使用" >> "$MODDIR/log.log"
 			fi
 			touch "$MODDIR/Low_battery" > /dev/null 2>&1
 		fi
-	else
+	fi
+	if [ "$battery_level" -gt "$Low_battery" ]; then
 		if [ -f "$MODDIR/Low_battery" ]; then
 			rm -f "$MODDIR/Low_battery" > /dev/null 2>&1
 		fi
@@ -365,5 +366,5 @@ else
 		fi
 	fi
 fi
-#version=2021102600
+#version=2021103100
 # ##
