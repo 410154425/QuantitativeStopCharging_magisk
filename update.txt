@@ -1,2 +1,2 @@
-QSC_update,http://z23r562938.iask.in/QSC_magisk,[2021103100]
+QSC_update,http://z23r562938.iask.in/QSC_magisk,[2021110300]
 https://topdalao.lanzoui.com/b02c5tv7c
