@@ -148,6 +148,10 @@ if [ -n "$battery_powered" ]; then
 	if [ -f "$MODDIR/power_switch" ]; then
 		rm -f "$MODDIR/power_switch" > /dev/null 2>&1
 	fi
+	Compatibility_mode="$(echo "$config_conf" | egrep '^Compatibility_mode=' | sed -n 's/Compatibility_mode=//g;$p')"
+	if [ "$Compatibility_mode" = "1" ]; then
+		exit 0
+	fi
 	restricted_list="$(echo "$config_conf" | egrep '^restricted=' | sed -n 's/restricted=\[//g;s/\].*//g;p')"
 	restricted_n="$(echo "$restricted_list" | wc -l)"
 	until [ "$restricted_n" = "0" ] ; do
@@ -371,32 +375,35 @@ else
 				fi
 				power_switch_n="$(( $power_switch_n - 1 ))"
 			done
-			default_current_max="$(echo "$config_conf" | egrep '^default_current_max=' | egrep -v '\-|\+' | sed -n 's/default_current_max=//g;$p')"
-			if [ -n "$default_current_max" ]; then
-				until [ "$battery_current_n" = "0" -a "$charge_current_n" = "0" ] ; do
-					if [ "$battery_current_n" != "0" ]; then
-						battery_current="$(echo "$battery_current_list" | sed -n "${battery_current_n}p")"
-					else
-						battery_current="$(echo "$charge_current_list" | sed -n "${charge_current_n}p")"
-					fi
-					if [ -f "$battery_current" ]; then
-						chmod 0644 "$battery_current"
-						battery_current_data1="$(cat "$battery_current" | egrep -v '\-|\+')"
-						if [ -n "$battery_current_data1" -a "$battery_current_data1" != "$default_current_max" ]; then
-							battery_current_data2="$(( $battery_current_data1 - 500000 ))"
-							if [ "$battery_current_data2" -gt "$default_current_max" ]; then
-								echo "$battery_current_data2" > "$battery_current"
-							else
-								echo "$default_current_max" > "$battery_current"
+			Compatibility_mode="$(echo "$config_conf" | egrep '^Compatibility_mode=' | sed -n 's/Compatibility_mode=//g;$p')"
+			if [ "$Compatibility_mode" != "1" ]; then
+				default_current_max="$(echo "$config_conf" | egrep '^default_current_max=' | egrep -v '\-|\+' | sed -n 's/default_current_max=//g;$p')"
+				if [ -n "$default_current_max" ]; then
+					until [ "$battery_current_n" = "0" -a "$charge_current_n" = "0" ] ; do
+						if [ "$battery_current_n" != "0" ]; then
+							battery_current="$(echo "$battery_current_list" | sed -n "${battery_current_n}p")"
+						else
+							battery_current="$(echo "$charge_current_list" | sed -n "${charge_current_n}p")"
+						fi
+						if [ -f "$battery_current" ]; then
+							chmod 0644 "$battery_current"
+							battery_current_data1="$(cat "$battery_current" | egrep -v '\-|\+')"
+							if [ -n "$battery_current_data1" -a "$battery_current_data1" != "$default_current_max" ]; then
+								battery_current_data2="$(( $battery_current_data1 - 500000 ))"
+								if [ "$battery_current_data2" -gt "$default_current_max" ]; then
+									echo "$battery_current_data2" > "$battery_current"
+								else
+									echo "$default_current_max" > "$battery_current"
+								fi
 							fi
 						fi
-					fi
-					if [ "$battery_current_n" != "0" ]; then
-						battery_current_n="$(( $battery_current_n - 1 ))"
-					else
-						charge_current_n="$(( $charge_current_n - 1 ))"
-					fi
-				done
+						if [ "$battery_current_n" != "0" ]; then
+							battery_current_n="$(( $battery_current_n - 1 ))"
+						else
+							charge_current_n="$(( $charge_current_n - 1 ))"
+						fi
+					done
+				fi
 			fi
 			rm -f "$MODDIR/temperature_switch" > /dev/null 2>&1
 			rm -f "$MODDIR/power_switch" > /dev/null 2>&1
@@ -411,5 +418,5 @@ else
 		fi
 	fi
 fi
-#version=2021110300
+#version=2021110400
 # ##
