@@ -20,7 +20,7 @@ if [ "$work_weixin" = "1" ]; then
 		if [ ! -f "$MODDIR/Low_battery" ]; then
 			if type curl > /dev/null 2>&1; then
 				wx_agentid="$(echo "$config_conf" | egrep '^wx_agentid=' | sed -n 's/wx_agentid=//g;$p')"
-				wx_text="$(echo "$config_conf" | egrep '^wx_text=' | sed -n 's/wx_text=//g;$p')"
+				wx_text="$(echo -E "$config_conf" | egrep '^wx_text=' | sed -n 's/wx_text=//g;$p')"
 				wx_token="$(cat "$MODDIR/wx_$wx_agentid")"
 				wx_url="https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=$wx_token"
 				wx_post="{\"touser\": \"@all\",\"agentid\": \"$wx_agentid\",\"msgtype\": \"text\",\"text\": {\"content\": \"$wx_text\"}}"
