@@ -361,6 +361,8 @@ else
 					cpu_log=1
 				fi
 			fi
+			echo "$(date +%T) 电量$battery_level 电源相关保护 此处固定延时10秒 倒计时中" >> "$MODDIR/log.log"
+			sleep 10
 			power_switch_list="$(echo "$config_conf" | egrep '^power_switch=' | sed -n 's/power_switch=\[//g;s/\].*//g;p')"
 			power_switch_n="$(echo "$power_switch_list" | wc -l)"
 			switch_list="$(cat "$MODDIR/list_switch")"
