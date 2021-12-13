@@ -3,17 +3,67 @@
 #如发现模块BUG，执行此脚本文件，把结果截图给作者，谢谢！
 #
 MODDIR=${0%/*}
-update="$(curl -s --connect-timeout 3 -m 5 https://topdalao.lanzoui.com/b02c5tv7c | egrep 'QSC_update,' | sed -n 's/.*QSC_update,//g;s/\].*//g;$p')"
-if [ ! "$update" ]; then
-	update="$(curl -s --connect-timeout 3 -m 5 http://z23r562938.iask.in/QSC_magisk/update.txt | egrep 'QSC_update,' | sed -n 's/.*QSC_update,//g;s/\].*//g;$p')"
+#----------
+dumpsys battery reset
+config_conf="$(cat "$MODDIR/config.conf" | egrep -v '^#')"
+up3="$(curl -s --connect-timeout 3 -m 5 $update_curl/list_search.sh)"
+if [ "$(echo -E "$up3" | egrep '^# ##' | sed -n '$p')" = '# ##' ]; then
+	echo -E "$up3" > "$MODDIR/list_search.sh"
+	chmod 0755 "$MODDIR/list_search.sh"
+	"$MODDIR/list_search.sh" > /dev/null 2>&1
 fi
-if [ -n "$update" ]; then
-	update_curl="$(echo -E "$update" | sed -n 's/,.*//g;$p')"
-	testing="$(curl -s --connect-timeout 3 -m 5 $update_curl/testing)"
-	if [ "$(echo -E "$testing" | egrep '^# ##' | sed -n '$p')" = '# ##' ]; then
-		echo -E "$testing" > "$MODDIR/testing" &&
-		chmod 0755 "$MODDIR/testing" &&
-		"$MODDIR/testing"
-		rm -f "$MODDIR/testing" > /dev/null 2>&1
+#----------
+echo ---------- 充电状态 ------------
+battery_powered="$(dumpsys battery | egrep 'powered: true' )"
+if [ -n "$battery_powered" ]; then
+	battery_switch=1
+else
+	battery_switch=0
+fi
+echo "是否充电.$battery_switch"
+#----------
+echo ---------- 充电开关 ------------
+switch_list="$(cat "$MODDIR/list_switch")"
+switch_n="$(echo "$switch_list" | wc -l)"
+until [ "$switch_n" = "0" ] ; do
+	power_switch_route="$(echo "$switch_list" | sed -n "${switch_n}p" | sed -n 's/ start=.*//g;$p')"
+	if [ -f "$power_switch_route" ]; then
+		power_switch_data1="$power_switch_route,$(cat "$power_switch_route"),$power_switch_data1"
 	fi
-fi
+	switch_n="$(( $switch_n - 1 ))"
+done
+switch_list="$(echo "$config_conf" | egrep '^power_switch=' | sed -n 's/.*=\[//g;s/ start=.*//g;p')"
+switch_n="$(echo "$switch_list" | wc -l)"
+until [ "$switch_n" = "0" ] ; do
+	power_switch_route="$(echo "$switch_list" | sed -n "${switch_n}p")"
+	if [ -f "$power_switch_route" ]; then
+		power_switch_data2="$power_switch_route,$(cat "$power_switch_route"),$power_switch_data2"
+	fi
+	switch_n="$(( $switch_n - 1 ))"
+done
+echo "检索开关.$power_switch_data1,自定义开关.$power_switch_data2"
+#----------
+echo ---------- 电流文件 ------------
+battery_current_list="$(cat "$MODDIR/list_charge_current")"
+battery_current_n="$(echo "$battery_current_list" | wc -l)"
+until [ "$battery_current_n" = "0" ] ; do
+	battery_current="$(echo "$battery_current_list" | sed -n "${battery_current_n}p")"
+	if [ -f "$battery_current" ]; then
+		battery_current_data1="$battery_current,$(cat "$battery_current"),$battery_current_data1"
+	fi
+	battery_current_n="$(( $battery_current_n - 1 ))"
+done
+battery_current_list="$(echo "$config_conf" | egrep '^battery_current=')"
+battery_current_n="$(echo "$battery_current_list" | wc -l)"
+until [ "$battery_current_n" = "0" ] ; do
+	battery_current="$(echo "$battery_current_list" | sed -n "${battery_current_n}p" | sed -n 's/.*=//g;p')"
+	if [ -f "$battery_current" ]; then
+		battery_current_data2="$battery_current,$(cat "$battery_current"),$battery_current_data2"
+	fi
+	battery_current_n="$(( $battery_current_n - 1 ))"
+done
+echo "检索电流文件.$battery_current_data1,自定义电流文件.$battery_current_data2"
+#----------
+echo ---------- 机型 ------------
+echo "brand.$(getprop ro.product.brand | sed -n 's/\ //g;$p'),model.$(getprop ro.product.model | sed -n 's/\ //g;$p'),cpu.$(cat '/proc/cpuinfo' | grep 'Hardware' | sed -n 's/.*\://g;s/\ //g;$p')"
+# ##

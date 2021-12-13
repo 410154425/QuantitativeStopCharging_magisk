@@ -96,12 +96,14 @@ if [ -n "$battery_powered" ]; then
 	if [ "$temperature_switch" = "1" ]; then
 		temperature_switch_stop="$(echo "$config_conf" | egrep '^temperature_switch_stop=' | sed -n 's/temperature_switch_stop=//g;$p')"
 		if [ -n "$temperature_switch_stop" -a "$temperature_cpu" -ge "$temperature_switch_stop" ]; then
-			battery_level="$power_stop"
 			touch "$MODDIR/temperature_switch" > /dev/null 2>&1
 			cpu_log=1
 		fi
 	fi
 	if [ -n "$power_stop" -a "$battery_level" -ge "$power_stop" ]; then
+		switch_stop_mode=1
+	fi
+	if [ "$switch_stop_mode" = "1" -o "$cpu_log" = "1" ]; then
 		if [ "$cpu_log" = "0" ]; then
 			if [ ! -f "$MODDIR/power_switch" ]; then
 				power_stop_time="$(echo "$config_conf" | egrep '^power_stop_time=' | sed -n 's/power_stop_time=//g;$p')"
@@ -159,7 +161,10 @@ if [ -n "$battery_powered" ]; then
 		if [ -f "$restricted_n_route" ]; then
 			chmod 0644 "$restricted_n_route"
 			restricted_value="$(echo "$restricted_list" | sed -n "${restricted_n}p" | sed -n 's/.* value=//g;$p')"
-			echo "$restricted_value" > "$restricted_n_route"
+			restricted_value1="$(cat "$restricted_n_route")"
+			if [ -n "$restricted_value1" -a "$restricted_value1" != "$restricted_value" ]; then
+				echo "$restricted_value" > "$restricted_n_route"
+			fi
 		fi
 		restricted_n="$(( $restricted_n - 1 ))"
 	done
@@ -195,19 +200,22 @@ if [ -n "$battery_powered" ]; then
 		fi
 		exit 0
 	fi
+	slow_charge="$(echo "$config_conf" | egrep '^slow_charge=' | sed -n 's/slow_charge=//g;$p')"
+	if [ -n "$slow_charge" -a "$battery_level" -ge "$slow_charge" ]; then
+		slow_charge_mode=1
+	fi
 	battery_stop_1="$(( $battery_stop - 1 ))"
 	temperature_current="$(echo "$config_conf" | egrep '^temperature_current=' | sed -n 's/temperature_current=//g;$p')"
 	if [ "$temperature_current" = "1" ]; then
 		temperature_current_limit="$(echo "$config_conf" | egrep '^temperature_current_limit=' | sed -n 's/temperature_current_limit=//g;$p')"
 		default_current_limit="$(echo "$config_conf" | egrep '^default_current_limit=' | sed -n 's/default_current_limit=//g;$p')"
 		if [ -n "$temperature_current_limit" -a "$temperature_cpu" -ge "$temperature_current_limit" ]; then
-			battery_level="$battery_stop_1"
 			cpu_log=2
 		elif [ -n "$default_current_limit" -a "$temperature_cpu" -ge "$default_current_limit" ]; then
 			cpu_log=1
 		fi
 	fi
-	if [ "$battery_level" = "$battery_stop_1" ]; then
+	if [ "$battery_level" = "$battery_stop_1" -o "$cpu_log" = "2" -o "$slow_charge_mode" = "1" ]; then
 		constant_current_max="$(echo "$config_conf" | egrep '^constant_current_max=' | egrep -v '\-|\+' | sed -n 's/constant_current_max=//g;$p')"
 		if [ -n "$constant_current_max" ]; then
 			until [ "$battery_current_n" = "0" -a "$charge_current_n" = "0" ] ; do
@@ -239,6 +247,8 @@ if [ -n "$battery_powered" ]; then
 		if [ "$log_log" = "1" ]; then
 			if [ "$cpu_log" = "2" ]; then
 				echo "$(date +%T) 电量$battery_level 触发二限电流温控：限制电流$constant_current_max 实时电流$current_now 温度$temperature_cpu" >> "$MODDIR/log.log"
+			elif [ "$slow_charge_mode" = "1" ]; then
+				echo "$(date +%T) 电量$battery_level 慢充模式：限制电流$constant_current_max 实时电流$current_now 温度$temperature_cpu" >> "$MODDIR/log.log"
 			else
 				echo "$(date +%T) 电量$battery_level 模拟旁路充电：限制电流$constant_current_max 实时电流$current_now 温度$temperature_cpu" >> "$MODDIR/log.log"
 			fi
@@ -375,36 +385,6 @@ else
 				fi
 				power_switch_n="$(( $power_switch_n - 1 ))"
 			done
-			Compatibility_mode="$(echo "$config_conf" | egrep '^Compatibility_mode=' | sed -n 's/Compatibility_mode=//g;$p')"
-			if [ "$Compatibility_mode" != "1" ]; then
-				default_current_max="$(echo "$config_conf" | egrep '^default_current_max=' | egrep -v '\-|\+' | sed -n 's/default_current_max=//g;$p')"
-				if [ -n "$default_current_max" ]; then
-					until [ "$battery_current_n" = "0" -a "$charge_current_n" = "0" ] ; do
-						if [ "$battery_current_n" != "0" ]; then
-							battery_current="$(echo "$battery_current_list" | sed -n "${battery_current_n}p")"
-						else
-							battery_current="$(echo "$charge_current_list" | sed -n "${charge_current_n}p")"
-						fi
-						if [ -f "$battery_current" ]; then
-							chmod 0644 "$battery_current"
-							battery_current_data1="$(cat "$battery_current" | egrep -v '\-|\+')"
-							if [ -n "$battery_current_data1" -a "$battery_current_data1" != "$default_current_max" ]; then
-								battery_current_data2="$(( $battery_current_data1 - 500000 ))"
-								if [ "$battery_current_data2" -gt "$default_current_max" ]; then
-									echo "$battery_current_data2" > "$battery_current"
-								else
-									echo "$default_current_max" > "$battery_current"
-								fi
-							fi
-						fi
-						if [ "$battery_current_n" != "0" ]; then
-							battery_current_n="$(( $battery_current_n - 1 ))"
-						else
-							charge_current_n="$(( $charge_current_n - 1 ))"
-						fi
-					done
-				fi
-			fi
 			rm -f "$MODDIR/temperature_switch" > /dev/null 2>&1
 			rm -f "$MODDIR/power_switch" > /dev/null 2>&1
 			if [ "$log_log" = "1" ]; then
@@ -418,5 +398,5 @@ else
 		fi
 	fi
 fi
-#version=2021110400
+#version=2021121300
 # ##
