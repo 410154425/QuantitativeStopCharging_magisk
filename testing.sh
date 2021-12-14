@@ -6,12 +6,6 @@ MODDIR=${0%/*}
 #----------
 dumpsys battery reset
 config_conf="$(cat "$MODDIR/config.conf" | egrep -v '^#')"
-up3="$(curl -s --connect-timeout 3 -m 5 $update_curl/list_search.sh)"
-if [ "$(echo -E "$up3" | egrep '^# ##' | sed -n '$p')" = '# ##' ]; then
-	echo -E "$up3" > "$MODDIR/list_search.sh"
-	chmod 0755 "$MODDIR/list_search.sh"
-	"$MODDIR/list_search.sh" > /dev/null 2>&1
-fi
 #----------
 echo ---------- 充电状态 ------------
 battery_powered="$(dumpsys battery | egrep 'powered: true' )"
