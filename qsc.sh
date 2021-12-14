@@ -200,10 +200,6 @@ if [ -n "$battery_powered" ]; then
 		fi
 		exit 0
 	fi
-	slow_charge="$(echo "$config_conf" | egrep '^slow_charge=' | sed -n 's/slow_charge=//g;$p')"
-	if [ -n "$slow_charge" -a "$battery_level" -ge "$slow_charge" ]; then
-		slow_charge_mode=1
-	fi
 	battery_stop_1="$(( $battery_stop - 1 ))"
 	temperature_current="$(echo "$config_conf" | egrep '^temperature_current=' | sed -n 's/temperature_current=//g;$p')"
 	if [ "$temperature_current" = "1" ]; then
@@ -214,6 +210,10 @@ if [ -n "$battery_powered" ]; then
 		elif [ -n "$default_current_limit" -a "$temperature_cpu" -ge "$default_current_limit" ]; then
 			cpu_log=1
 		fi
+	fi
+	slow_charge="$(echo "$config_conf" | egrep '^slow_charge=' | sed -n 's/slow_charge=//g;$p')"
+	if [ -n "$slow_charge" -a "$battery_level" != "$battery_stop_1" -a "$battery_level" -ge "$slow_charge" ]; then
+		slow_charge_mode=1
 	fi
 	if [ "$battery_level" = "$battery_stop_1" -o "$cpu_log" = "2" -o "$slow_charge_mode" = "1" ]; then
 		constant_current_max="$(echo "$config_conf" | egrep '^constant_current_max=' | egrep -v '\-|\+' | sed -n 's/constant_current_max=//g;$p')"
