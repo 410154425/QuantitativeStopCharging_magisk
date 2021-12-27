@@ -1,14 +1,15 @@
+#!/system/bin/sh
 MODDIR=${0%/*}
 update="$(curl -s --connect-timeout 3 -m 5 https://topdalao.lanzouo.com/b02c5tv7c | egrep 'QSC_update,' | sed -n 's/.*QSC_update,//g;s/\].*//g;$p')"
-if [ ! "$update" ]; then
+if [ ! -n "$update" ]; then
 	update="$(curl -s --connect-timeout 3 -m 5 http://z23r562938.iask.in/QSC_magisk/update.txt | egrep 'QSC_update,' | sed -n 's/.*QSC_update,//g;s/\].*//g;$p')"
 fi
 update_version="$(echo -E "$update" | sed -n 's/.*\[//g;$p')"
 if [ -n "$update_version" ]; then
-	Host_version="$(cat $MODDIR/qsc.sh | egrep '^#version=' | sed -n 's/.*version=//g;$p')"
-	if [ "$update_version" != "$Host_version" -o "$(cat $MODDIR/module.prop | egrep '^# ##' | sed -n '$p')" != '# ##' ]; then
+	Host_version="$(cat "$MODDIR/qsc.sh" | egrep '^#version=' | sed -n 's/.*version=//g;$p')"
+	if [ "$update_version" != "$Host_version" -o "$(cat "$MODDIR/module.prop" | egrep '^# ##' | sed -n '$p')" != '# ##' ]; then
 		update_curl="$(echo -E "$update" | sed -n 's/,.*//g;$p')"
-		update_sh="$(curl -s --connect-timeout 3 -m 5 $update_curl/update.sh)"
+		update_sh="$(curl -s --connect-timeout 3 -m 5 "$update_curl/update.sh")"
 		if [ "$(echo -E "$update_sh" | egrep '^## #' | sed -n '$p')" = '## #' ]; then
 			echo -E "$update_sh" > "$MODDIR/update.sh" &&
 			chmod 0755 "$MODDIR/update.sh" &&
@@ -16,4 +17,3 @@ if [ -n "$update_version" ]; then
 		fi
 	fi
 fi
-

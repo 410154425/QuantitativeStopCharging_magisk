@@ -1,3 +1,4 @@
+#!/system/bin/sh
 MODDIR=${0%/*}
 dumpsys battery reset
 config_conf="$(cat "$MODDIR/config.conf" | egrep -v '^#')"
@@ -10,7 +11,7 @@ charge_current_list="$(cat "$MODDIR/list_charge_current")"
 charge_current_n="$(echo "$charge_current_list" | wc -l)"
 log_log=0
 cpu_log=0
-if [ ! "$battery_level" ]; then
+if [ ! -n "$battery_level" ]; then
 	exit 0
 fi
 work_weixin="$(echo "$config_conf" | egrep '^work_weixin=' | sed -n 's/work_weixin=//g;$p')"
@@ -43,30 +44,30 @@ if [ "$work_weixin" = "1" ]; then
 										wx_push_errcode="$(echo "$wx_push" | egrep '\"errcode\"' | sed -n 's/ //g;s/.*\"errcode\"://g;s/\".*//g;s/,.*//g;$p')"
 									fi
 								else
-									echo "$(date +%T) 电量$battery_level 微信消息推送失败：请检查配置参数[企业ID]、[应用Secret]是否填写正确且相互匹配，返回提示：$wx_access_token" >> "$MODDIR/log.log"
+									echo "$(date +%F_%T) 电量$battery_level 微信消息推送失败：请检查配置参数[企业ID]、[应用Secret]是否填写正确且相互匹配，返回提示：$wx_access_token" >> "$MODDIR/log.log"
 								fi
 							else
-								echo "$(date +%T) 电量$battery_level 微信消息推送失败：网络问题或请求过于频繁遭拦截" >> "$MODDIR/log.log"
+								echo "$(date +%F_%T) 电量$battery_level 微信消息推送失败：网络问题或请求过于频繁遭拦截" >> "$MODDIR/log.log"
 							fi
 						fi
 					else
-						echo "$(date +%T) 电量$battery_level 微信消息推送失败：[应用AgentId]参数未填写" >> "$MODDIR/log.log"
+						echo "$(date +%F_%T) 电量$battery_level 微信消息推送失败：[应用AgentId]参数未填写" >> "$MODDIR/log.log"
 					fi
 				fi
 				if [ -n "$wx_push" ]; then
 					if [ "$wx_push_errcode" = "0" ]; then
 						echo "$wx_token" > "$MODDIR/wx_$wx_agentid"
-						echo "$(date +%T) 电量$battery_level 微信消息推送成功：$wx_text" >> "$MODDIR/log.log"
+						echo "$(date +%F_%T) 电量$battery_level 微信消息推送成功：$wx_text" >> "$MODDIR/log.log"
 					elif [ "$wx_push_errcode" = "44004" ]; then
-						echo "$(date +%T) 电量$battery_level 微信消息推送失败：[消息内容]参数未填写或填写错误" >> "$MODDIR/log.log"
+						echo "$(date +%F_%T) 电量$battery_level 微信消息推送失败：[消息内容]参数未填写或填写错误" >> "$MODDIR/log.log"
 					elif [ "$wx_push_errcode" != "42001" -a "$wx_push_errcode" != "41001" -a "$wx_push_errcode" != "40014" ]; then
-						echo "$(date +%T) 电量$battery_level 微信消息推送失败：请检查配置参数[企业ID]、[应用Secret]、[应用AgentId]是否填写正确且相互匹配，返回提示：$wx_push" >> "$MODDIR/log.log"
+						echo "$(date +%F_%T) 电量$battery_level 微信消息推送失败：请检查配置参数[企业ID]、[应用Secret]、[应用AgentId]是否填写正确且相互匹配，返回提示：$wx_push" >> "$MODDIR/log.log"
 					fi
 				else
-					echo "$(date +%T) 电量$battery_level 微信消息推送失败：网络问题，访问接口失败" >> "$MODDIR/log.log"
+					echo "$(date +%F_%T) 电量$battery_level 微信消息推送失败：网络问题，访问接口失败" >> "$MODDIR/log.log"
 				fi
 			else
-				echo "$(date +%T) 电量$battery_level 缺少curl命令模块：无法使用微信消息推送功能，请安装curl模块后再使用" >> "$MODDIR/log.log"
+				echo "$(date +%F_%T) 电量$battery_level 缺少curl命令模块：无法使用微信消息推送功能，请安装curl模块后再使用" >> "$MODDIR/log.log"
 			fi
 			touch "$MODDIR/Low_battery" > /dev/null 2>&1
 		fi
@@ -87,7 +88,7 @@ if [ -n "$battery_powered" ]; then
 		temperature_route="$(cat "$MODDIR/list_thermal_zone" | sed -n '1p')"
 	fi
 	temperature_cpu="$(cat "$temperature_route" | egrep -v '\-|\+' | cut -c '1-2')"
-	log_n="$(cat $MODDIR/log.log | wc -l)"
+	log_n="$(cat "$MODDIR/log.log" | wc -l)"
 	if [ "$log_n" -gt "600" ]; then
 		sed -i '1,10d' "$MODDIR/log.log" > /dev/null 2>&1
 	fi
@@ -107,11 +108,11 @@ if [ -n "$battery_powered" ]; then
 		if [ "$cpu_log" = "0" ]; then
 			if [ ! -f "$MODDIR/power_switch" ]; then
 				power_stop_time="$(echo "$config_conf" | egrep '^power_stop_time=' | sed -n 's/power_stop_time=//g;$p')"
-				echo "$(date +%T) 电量$battery_level 停止供电之前 继续供电$power_stop_time秒 倒计时中" >> "$MODDIR/log.log"
+				echo "$(date +%F_%T) 电量$battery_level 停止供电之前 继续供电$power_stop_time秒 倒计时中" >> "$MODDIR/log.log"
 				sleep "$power_stop_time"
 			fi
 		fi
-		echo "$(date +%T) 电量$battery_level 电源相关保护 此处固定延时10秒 倒计时中" >> "$MODDIR/log.log"
+		echo "$(date +%F_%T) 电量$battery_level 电源相关保护 此处固定延时10秒 倒计时中" >> "$MODDIR/log.log"
 		sleep 10
 		power_switch_list="$(echo "$config_conf" | egrep '^power_switch=' | sed -n 's/power_switch=\[//g;s/\].*//g;p')"
 		power_switch_n="$(echo "$power_switch_list" | wc -l)"
@@ -140,9 +141,9 @@ if [ -n "$battery_powered" ]; then
 		touch "$MODDIR/power_switch" > /dev/null 2>&1
 		if [ "$log_log" = "1" ]; then
 			if [ "$cpu_log" = "1" ]; then
-				echo "$(date +%T) 电量$battery_level 触发QSC开关温控：停止充电器供电 温度$temperature_cpu" >> "$MODDIR/log.log"
+				echo "$(date +%F_%T) 电量$battery_level 触发QSC开关温控：停止充电器供电 温度$temperature_cpu" >> "$MODDIR/log.log"
 			else
-				echo "$(date +%T) 电量$battery_level 停止充电器供电" >> "$MODDIR/log.log"
+				echo "$(date +%F_%T) 电量$battery_level 停止充电器供电" >> "$MODDIR/log.log"
 			fi
 		fi
 		exit 0
@@ -196,7 +197,7 @@ if [ -n "$battery_powered" ]; then
 			fi
 		done
 		if [ "$log_log" = "1" ]; then
-			echo "$(date +%T) 电量$battery_level 模拟旁路充电：限制电流0 实时电流$current_now 温度$temperature_cpu" >> "$MODDIR/log.log"
+			echo "$(date +%F_%T) 电量$battery_level 模拟旁路充电：限制电流0 实时电流$current_now 温度$temperature_cpu" >> "$MODDIR/log.log"
 		fi
 		exit 0
 	fi
@@ -246,11 +247,11 @@ if [ -n "$battery_powered" ]; then
 		fi
 		if [ "$log_log" = "1" ]; then
 			if [ "$cpu_log" = "2" ]; then
-				echo "$(date +%T) 电量$battery_level 触发二限电流温控：限制电流$constant_current_max 实时电流$current_now 温度$temperature_cpu" >> "$MODDIR/log.log"
+				echo "$(date +%F_%T) 电量$battery_level 触发二限电流温控：限制电流$constant_current_max 实时电流$current_now 温度$temperature_cpu" >> "$MODDIR/log.log"
 			elif [ "$slow_charge_mode" = "1" ]; then
-				echo "$(date +%T) 电量$battery_level 慢充模式：限制电流$constant_current_max 实时电流$current_now 温度$temperature_cpu" >> "$MODDIR/log.log"
+				echo "$(date +%F_%T) 电量$battery_level 慢充模式：限制电流$constant_current_max 实时电流$current_now 温度$temperature_cpu" >> "$MODDIR/log.log"
 			else
-				echo "$(date +%T) 电量$battery_level 模拟旁路充电：限制电流$constant_current_max 实时电流$current_now 温度$temperature_cpu" >> "$MODDIR/log.log"
+				echo "$(date +%F_%T) 电量$battery_level 模拟旁路充电：限制电流$constant_current_max 实时电流$current_now 温度$temperature_cpu" >> "$MODDIR/log.log"
 			fi
 		fi
 		exit 0
@@ -294,7 +295,7 @@ if [ -n "$battery_powered" ]; then
 							done
 						fi
 						if [ "$log_log" = "1" ]; then
-							echo "$(date +%T) 电量$battery_level 游戏模式：限制电流$app_current_max 实时电流$current_now 温度$temperature_cpu" >> "$MODDIR/log.log"
+							echo "$(date +%F_%T) 电量$battery_level 游戏模式：限制电流$app_current_max 实时电流$current_now 温度$temperature_cpu" >> "$MODDIR/log.log"
 						fi
 						exit 0
 					fi
@@ -336,9 +337,9 @@ if [ -n "$battery_powered" ]; then
 		fi
 		if [ "$log_log" = "1" ]; then
 			if [ "$cpu_log" = "1" ]; then
-				echo "$(date +%T) 电量$battery_level 触发一限电流温控：限制电流$default_current_max 实时电流$current_now 温度$temperature_cpu" >> "$MODDIR/log.log"
+				echo "$(date +%F_%T) 电量$battery_level 触发一限电流温控：限制电流$default_current_max 实时电流$current_now 温度$temperature_cpu" >> "$MODDIR/log.log"
 			else
-				echo "$(date +%T) 电量$battery_level 默认模式：限制电流$default_current_max 实时电流$current_now 温度$temperature_cpu" >> "$MODDIR/log.log"
+				echo "$(date +%F_%T) 电量$battery_level 默认模式：限制电流$default_current_max 实时电流$current_now 温度$temperature_cpu" >> "$MODDIR/log.log"
 			fi
 		fi
 		exit 0
@@ -361,7 +362,7 @@ else
 					cpu_log=1
 				fi
 			fi
-			echo "$(date +%T) 电量$battery_level 电源相关保护 此处固定延时10秒 倒计时中" >> "$MODDIR/log.log"
+			echo "$(date +%F_%T) 电量$battery_level 电源相关保护 此处固定延时10秒 倒计时中" >> "$MODDIR/log.log"
 			sleep 10
 			power_switch_list="$(echo "$config_conf" | egrep '^power_switch=' | sed -n 's/power_switch=\[//g;s/\].*//g;p')"
 			power_switch_n="$(echo "$power_switch_list" | wc -l)"
@@ -391,14 +392,13 @@ else
 			rm -f "$MODDIR/power_switch" > /dev/null 2>&1
 			if [ "$log_log" = "1" ]; then
 				if [ "$cpu_log" = "1" ]; then
-					echo "$(date +%T) 电量$battery_level 触发QSC开关温控：恢复充电器供电 温度$temperature_cpu" >> "$MODDIR/log.log"
+					echo "$(date +%F_%T) 电量$battery_level 触发QSC开关温控：恢复充电器供电 温度$temperature_cpu" >> "$MODDIR/log.log"
 				else
-					echo "$(date +%T) 电量$battery_level 恢复充电器供电" >> "$MODDIR/log.log"
+					echo "$(date +%F_%T) 电量$battery_level 恢复充电器供电" >> "$MODDIR/log.log"
 				fi
 			fi
-			exit 0
 		fi
 	fi
 fi
-#version=2021121300
+#version=2021122700
 # ##
