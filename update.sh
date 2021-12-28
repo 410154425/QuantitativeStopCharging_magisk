@@ -1,4 +1,3 @@
-#!/system/bin/sh
 MODDIR=${0%/*}
 module_version="$(cat "$MODDIR/module.prop" | grep 'version=' | sed -n 's/.*version\=//g;$p')"
 Host_version="$(cat "$MODDIR/qsc.sh" | egrep '^#version=' | sed -n 's/.*version=//g;$p')"
@@ -16,4 +15,3 @@ if [ "$(echo -E "$up1" | egrep '^# ##' | sed -n '$p')" = '# ##' -a "$(echo -E "$
 	chmod 0755 "$MODDIR/qsc.sh"
 	chmod 0644 "$MODDIR/module.prop"
 fi
-

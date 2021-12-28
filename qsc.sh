@@ -1,4 +1,3 @@
-#!/system/bin/sh
 MODDIR=${0%/*}
 dumpsys battery reset
 config_conf="$(cat "$MODDIR/config.conf" | egrep -v '^#')"
@@ -400,5 +399,5 @@ else
 		fi
 	fi
 fi
-#version=2021122700
+#version=2021122800
 # ##
