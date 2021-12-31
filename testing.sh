@@ -4,17 +4,10 @@
 #
 MODDIR=${0%/*}
 #----------
-dumpsys battery reset
 config_conf="$(cat "$MODDIR/config.conf" | egrep -v '^#')"
 #----------
 echo ---------- 充电状态 ------------
-battery_powered="$(dumpsys battery | egrep 'powered: true' )"
-if [ -n "$battery_powered" ]; then
-	battery_switch=1
-else
-	battery_switch=0
-fi
-echo "是否充电.$battery_switch"
+dumpsys battery
 #----------
 echo ---------- 充电开关 ------------
 switch_list="$(cat "$MODDIR/list_switch")"
@@ -59,5 +52,7 @@ done
 echo "检索电流文件.$battery_current_data1,自定义电流文件.$battery_current_data2"
 #----------
 echo ---------- 机型 ------------
-echo "brand.$(getprop ro.product.brand | sed -n 's/\ //g;$p'),model.$(getprop ro.product.model | sed -n 's/\ //g;$p'),cpu.$(cat '/proc/cpuinfo' | grep 'Hardware' | sed -n 's/.*\://g;s/\ //g;$p')"
+module_version="$(cat "$MODDIR/module.prop" | grep 'version=' | sed -n 's/.*version\=//g;$p')"
+Host_version="$(cat "$MODDIR/qsc.sh" | egrep '^#version=' | sed -n 's/.*version=//g;$p')"
+echo "module.$(echo $module_version | sed -n 's/ //g;$p'),version.$(echo $Host_version | sed -n 's/ //g;$p'),serialno.$(getprop ro.serialno | sed -n 's/ //g;$p'),release.$(getprop ro.build.version.release | sed -n 's/ //g;$p'),sdk.$(getprop ro.build.version.sdk | sed -n 's/ //g;$p'),brand.$(getprop ro.product.brand | sed -n 's/ //g;$p'),model.$(getprop ro.product.model | sed -n 's/ //g;$p'),cpu.$(cat '/proc/cpuinfo' | egrep 'Hardware' | sed -n 's/.*://g;s/ //g;$p')"
 # ##

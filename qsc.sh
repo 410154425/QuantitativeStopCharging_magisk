@@ -1,8 +1,9 @@
 MODDIR=${0%/*}
 dumpsys battery reset
 config_conf="$(cat "$MODDIR/config.conf" | egrep -v '^#')"
-battery_level="$(dumpsys battery | egrep 'level:' | sed -n 's/.*level: //g;$p')"
-battery_powered="$(dumpsys battery | egrep 'powered: true' )"
+dumpsys_battery="$(dumpsys battery)"
+battery_level="$(echo "$dumpsys_battery" | egrep 'level: ' | sed -n 's/.*level: //g;$p')"
+battery_powered="$(echo "$dumpsys_battery" | egrep 'status: ' | sed -n 's/.*status: //g;$p')"
 Shut_down="$(echo "$config_conf" | egrep '^Shut_down=' | sed -n 's/Shut_down=//g;$p')"
 battery_current_list="$(echo "$config_conf" | egrep '^battery_current=' | sed -n 's/battery_current=//g;p')"
 battery_current_n="$(echo "$battery_current_list" | wc -l)"
@@ -66,7 +67,7 @@ if [ "$work_weixin" = "1" ]; then
 					echo "$(date +%F_%T) 电量$battery_level 微信消息推送失败：网络问题，访问接口失败" >> "$MODDIR/log.log"
 				fi
 			else
-				echo "$(date +%F_%T) 电量$battery_level 缺少curl命令模块：无法使用微信消息推送功能，请安装curl模块后再使用" >> "$MODDIR/log.log"
+				echo "$(date +%F_%T) 电量$battery_level 缺少curl命令：无法使用微信消息推送功能，请安装curl模块后再使用" >> "$MODDIR/log.log"
 			fi
 			touch "$MODDIR/Low_battery" > /dev/null 2>&1
 		fi
@@ -80,13 +81,27 @@ fi
 if [ "$battery_level" -le "$Shut_down" -a "$battery_level" -le "20" ]; then
 	reboot -p
 fi
-if [ -n "$battery_powered" ]; then
+if [ "$battery_powered" = "2" ]; then
+	if [ ! -f "$MODDIR/list_switch" -o ! -f "$MODDIR/list_charge_current" -o ! -f "$MODDIR/list_thermal_zone" ]; then
+		if [ -f "$MODDIR/list_search.sh" ]; then
+			chmod 0755 "$MODDIR/list_search.sh"
+			"$MODDIR/list_search.sh" > /dev/null 2>&1
+			echo "$(date +%F_%T) 缺少列表文件，正在创建，请稍等" >> "$MODDIR/log.log"
+			exit 0
+		else
+			echo "$(date +%F_%T) list_search.sh文件不存在，请重装本模块" >> "$MODDIR/log.log"
+			exit 0
+		fi
+	fi
 	current_now="$(cat '/sys/class/power_supply/battery/current_now')"
 	temperature_route="$(echo "$config_conf" | egrep '^temperature_route=' | sed -n 's/temperature_route=//g;$p')"
 	if [ ! -f "$temperature_route" ]; then
 		temperature_route="$(cat "$MODDIR/list_thermal_zone" | sed -n '1p')"
 	fi
 	temperature_cpu="$(cat "$temperature_route" | egrep -v '\-|\+' | cut -c '1-2')"
+	if [ ! -n "$temperature_cpu" ]; then
+		temperature_cpu="$(echo "$dumpsys_battery" | egrep 'temperature: ' | sed -n 's/.*temperature: //g;$p' | cut -c '1-2')"
+	fi
 	log_n="$(cat "$MODDIR/log.log" | wc -l)"
 	if [ "$log_n" -gt "600" ]; then
 		sed -i '1,10d' "$MODDIR/log.log" > /dev/null 2>&1
@@ -354,6 +369,9 @@ else
 					temperature_route="$(cat "$MODDIR/list_thermal_zone" | sed -n '1p')"
 				fi
 				temperature_cpu="$(cat "$temperature_route" | egrep -v '\-|\+' | cut -c '1-2')"
+				if [ ! -n "$temperature_cpu" ]; then
+					temperature_cpu="$(echo "$dumpsys_battery" | egrep 'temperature: ' | sed -n 's/.*temperature: //g;$p' | cut -c '1-2')"
+				fi
 				temperature_switch_start="$(echo "$config_conf" | egrep '^temperature_switch_start=' | sed -n 's/temperature_switch_start=//g;$p')"
 				if [ -n "$temperature_switch_start" -a "$temperature_cpu" -gt "$temperature_switch_start" ]; then
 					exit 0
@@ -399,5 +417,5 @@ else
 		fi
 	fi
 fi
-#version=2021122800
+#version=2022010100
 # ##

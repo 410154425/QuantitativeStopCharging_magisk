@@ -1,7 +1,7 @@
 until [ $(getprop sys.boot_completed) -eq 1 ] ; do
   sleep 5
 done
-sleep 1
+sleep 5
 MODDIR=${0%/*}
 chmod 0755 "$MODDIR/up"
 chmod 0755 "$MODDIR/qsc.sh"
@@ -13,7 +13,7 @@ chmod 0644 "$MODDIR/config.conf"
 chmod 0644 "$MODDIR/log.log"
 sleep 1
 up=1
-"$MODDIR/list_search.sh" > /dev/null 2>&1 &
+"$MODDIR/list_search.sh" > /dev/null 2>&1
 while :;
 do
 if [ "$up" = "20" -o "$up" = "7200" ]; then
