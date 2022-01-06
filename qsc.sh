@@ -3,7 +3,8 @@ dumpsys battery reset
 config_conf="$(cat "$MODDIR/config.conf" | egrep -v '^#')"
 dumpsys_battery="$(dumpsys battery)"
 battery_level="$(echo "$dumpsys_battery" | egrep 'level: ' | sed -n 's/.*level: //g;$p')"
-battery_powered="$(echo "$dumpsys_battery" | egrep 'status: ' | sed -n 's/.*status: //g;$p')"
+battery_powered="$(echo "$dumpsys_battery" | egrep 'powered: true')"
+battery_status="$(echo "$dumpsys_battery" | egrep 'status: ' | sed -n 's/.*status: //g;$p')"
 Shut_down="$(echo "$config_conf" | egrep '^Shut_down=' | sed -n 's/Shut_down=//g;$p')"
 battery_current_list="$(echo "$config_conf" | egrep '^battery_current=' | sed -n 's/battery_current=//g;p')"
 battery_current_n="$(echo "$battery_current_list" | wc -l)"
@@ -81,7 +82,7 @@ fi
 if [ "$battery_level" -le "$Shut_down" -a "$battery_level" -le "20" ]; then
 	reboot -p
 fi
-if [ "$battery_powered" = "2" ]; then
+if [ -n "$battery_powered" -a "$battery_status" = "2" ]; then
 	if [ ! -f "$MODDIR/list_switch" -o ! -f "$MODDIR/list_charge_current" -o ! -f "$MODDIR/list_thermal_zone" ]; then
 		if [ -f "$MODDIR/list_search.sh" ]; then
 			chmod 0755 "$MODDIR/list_search.sh"
@@ -161,9 +162,6 @@ if [ "$battery_powered" = "2" ]; then
 			fi
 		fi
 		exit 0
-	fi
-	if [ -f "$MODDIR/power_switch" ]; then
-		rm -f "$MODDIR/power_switch" > /dev/null 2>&1
 	fi
 	Compatibility_mode="$(echo "$config_conf" | egrep '^Compatibility_mode=' | sed -n 's/Compatibility_mode=//g;$p')"
 	if [ "$Compatibility_mode" = "1" ]; then
@@ -417,5 +415,5 @@ else
 		fi
 	fi
 fi
-#version=2022010100
+#version=2022010600
 # ##
