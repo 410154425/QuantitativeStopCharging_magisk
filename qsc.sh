@@ -1,11 +1,14 @@
 MODDIR=${0%/*}
 dumpsys battery reset
 config_conf="$(cat "$MODDIR/config.conf" | egrep -v '^#')"
+current_now="$(cat '/sys/class/power_supply/battery/current_now')"
 dumpsys_battery="$(dumpsys battery)"
 battery_level="$(echo "$dumpsys_battery" | egrep 'level: ' | sed -n 's/.*level: //g;$p')"
 battery_powered="$(echo "$dumpsys_battery" | egrep 'powered: true')"
 battery_status="$(echo "$dumpsys_battery" | egrep 'status: ' | sed -n 's/.*status: //g;$p')"
+charger_state="$(echo "$config_conf" | egrep '^charger_state=' | sed -n 's/charger_state=//g;$p')"
 Shut_down="$(echo "$config_conf" | egrep '^Shut_down=' | sed -n 's/Shut_down=//g;$p')"
+battery_stop="$(echo "$config_conf" | egrep '^battery_stop=' | sed -n 's/battery_stop=//g;$p')"
 battery_current_list="$(echo "$config_conf" | egrep '^battery_current=' | sed -n 's/battery_current=//g;p')"
 battery_current_n="$(echo "$battery_current_list" | wc -l)"
 charge_current_list="$(cat "$MODDIR/list_charge_current")"
@@ -82,6 +85,15 @@ fi
 if [ "$battery_level" -le "$Shut_down" -a "$battery_level" -le "20" ]; then
 	reboot -p
 fi
+if [ "$charger_state" = "1" ]; then
+	if [ -n "$current_now" -a "$current_now" -le "0" ]; then
+		battery_powered=1
+		battery_status=2
+		battery_stop=110
+	else
+		battery_status=1
+	fi
+fi
 if [ -n "$battery_powered" -a "$battery_status" = "2" ]; then
 	if [ ! -f "$MODDIR/list_switch" -o ! -f "$MODDIR/list_charge_current" -o ! -f "$MODDIR/list_thermal_zone" ]; then
 		if [ -f "$MODDIR/list_search.sh" ]; then
@@ -94,7 +106,6 @@ if [ -n "$battery_powered" -a "$battery_status" = "2" ]; then
 			exit 0
 		fi
 	fi
-	current_now="$(cat '/sys/class/power_supply/battery/current_now')"
 	temperature_route="$(echo "$config_conf" | egrep '^temperature_route=' | sed -n 's/temperature_route=//g;$p')"
 	if [ ! -f "$temperature_route" ]; then
 		temperature_route="$(cat "$MODDIR/list_thermal_zone" | sed -n '1p')"
@@ -181,7 +192,6 @@ if [ -n "$battery_powered" -a "$battery_status" = "2" ]; then
 		fi
 		restricted_n="$(( $restricted_n - 1 ))"
 	done
-	battery_stop="$(echo "$config_conf" | egrep '^battery_stop=' | sed -n 's/battery_stop=//g;$p')"
 	if [ -n "$battery_stop" -a "$battery_level" -ge "$battery_stop" ]; then
 		until [ "$battery_current_n" = "0" -a "$charge_current_n" = "0" ] ; do
 			if [ "$battery_current_n" != "0" ]; then
@@ -415,5 +425,5 @@ else
 		fi
 	fi
 fi
-#version=2022010600
+#version=2022012300
 # ##

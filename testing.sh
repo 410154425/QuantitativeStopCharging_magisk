@@ -6,6 +6,8 @@ MODDIR=${0%/*}
 #----------
 config_conf="$(cat "$MODDIR/config.conf" | egrep -v '^#')"
 Compatibility_mode="$(echo "$config_conf" | egrep '^Compatibility_mode=' | sed -n 's/Compatibility_mode=//g;$p')"
+charger_state="$(echo "$config_conf" | egrep '^charger_state=' | sed -n 's/charger_state=//g;$p')"
+current_now="$(cat '/sys/class/power_supply/battery/current_now')"
 power_stop="$(echo "$config_conf" | egrep '^power_stop=' | sed -n 's/power_stop=//g;$p')"
 power_start="$(echo "$config_conf" | egrep '^power_start=' | sed -n 's/power_start=//g;$p')"
 battery_stop="$(echo "$config_conf" | egrep '^battery_stop=' | sed -n 's/battery_stop=//g;$p')"
@@ -13,7 +15,7 @@ slow_charge="$(echo "$config_conf" | egrep '^slow_charge=' | sed -n 's/slow_char
 #----------
 echo ---------- 充电状态 ------------
 dumpsys battery
-echo "兼容模式$Compatibility_mode,停供电量$power_stop,恢复电量$power_start,旁路充电$battery_stop,慢充模式$slow_charge"
+echo "兼容模式$Compatibility_mode,辅助判断$charger_state,停供电量$power_stop,恢复电量$power_start,旁路充电$battery_stop,慢充模式$slow_charge,实时电流$current_now"
 if [ -f "$MODDIR/power_switch" ]; then
 	echo "power_switch文件存在"
 else
