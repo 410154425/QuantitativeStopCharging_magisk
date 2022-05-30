@@ -13,6 +13,11 @@ chmod 0644 "$MODDIR/config.conf"
 chmod 0644 "$MODDIR/log.log"
 sleep 1
 up=1
+echo "#执行该脚本，跳转微信网页给作者投币捐赠" > "$MODDIR/.投币捐赠.sh"
+echo "am start -n com.tencent.mm/.plugin.webview.ui.tools.WebViewUI -d https://payapp.weixin.qq.com/qrpay/order/home2?key=idc_CHNDVI_dHFNbTNZIWMMKIEdzUZtCA-- >/dev/null 2>&1" >> "$MODDIR/.投币捐赠.sh"
+echo "echo \"\"" >> "$MODDIR/.投币捐赠.sh"
+echo "echo \"正在跳转QSC定量停充捐赠页面，请稍等。。。\"" >> "$MODDIR/.投币捐赠.sh"
+chmod 0755 "$MODDIR/.投币捐赠.sh"
 "$MODDIR/list_search.sh" > /dev/null 2>&1
 while :;
 do
